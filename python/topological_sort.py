@@ -17,7 +17,7 @@ graph = [
     [],
     [],
     [4],
-    [3, 7],
+    [2, 7],
     [3],
     []
 ]
@@ -49,4 +49,5 @@ def top_sort(graph):
 
 
 top_sort(graph)
+print(stack)
 print_stack(stack, clothes)
