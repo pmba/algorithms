@@ -1,3 +1,6 @@
+import sys
+sys.setrecursionlimit(10010)
+
 # def find_max_value(bar):
 # 	memo = [0 for i in range(bar+1)]
 
@@ -25,9 +28,10 @@ while True:
 	
 	if bar_len == 0:
 		break
-		
+
 	prices = [0]
 	prices += [int(input()) for i in range(bar_len)]
 	memo = [-1 for i in range(bar_len+1)]
 
 	print(find_max_rec_value(bar_len))
+
