@@ -1,56 +1,50 @@
 import heapq
+DEBUG = 0
 
-DEBUG = 1
+def prim(graph, ini):
+    visited = [0 for i in range(len(graph))]
+    queue = []
+    mst = [[] for i in range(len(graph))]
 
-graph =[
-    [[2,1],[3,2]],
-    [[2,0],[5,2],[5,3]],
-    [[5,1],[7,3],[4,4],[3,0]],
-    [[5,1],[7,2],[4,4]],
-    [[4,2],[4,3]]
-]
+    visited[ini] = 1
+    heapq.heappush(queue, [0, ini, 0])
 
-def print_graph(graph):
-    for v in graph:
-        print(v)
+    mst_cost = 0
 
-def add_vertex(graph, v1, v2, cost):
-    graph[v1].append([cost, v2])
-    graph[v2].append([cost, v1])
-
-def mst(graph, start):
-    size = len(graph)
-    visited = [0 for x in range(size)]
-    heap = []
-    new_graph = [[] for x in range(size)]
-    total_cost = 0
-
-    visited[start] = 1
-    heapq.heappush(heap, [0, (0, 0)])
-    
-    while heap:
-        info = heapq.heappop(heap)
-        cur_cost = info[0]
-        origin = info[1][0]
-        destination = info[1][1]
-        visited[destination] = 1        
-
-        if not origin == destination:
-            total_cost += cur_cost
-            if DEBUG: print(origin, destination)
-            add_vertex(new_graph, origin, destination, cur_cost)
+    while queue:
+        cur_weight, cur_vertex, cur_previous = heapq.heappop(queue)
         
-        if sum(visited) == size:
-            print('MST Cost:', total_cost)
-            return new_graph
-
-        for vertex in range(len(graph[destination])):
-            edge_cost = graph[destination][vertex][0]
-            edge_to = graph[destination][vertex][1]
-
-            if not visited[edge_to]:
-                heapq.heappush(heap, [edge_cost, (destination, edge_to)])
+        if not visited[cur_vertex]:
+            visited[cur_vertex] = 1
+            mst_cost += cur_weight
+            mst[cur_vertex].append([cur_weight, cur_previous])
+            mst[cur_previous].append([cur_weight, cur_vertex])
+            if DEBUG: print(cur_vertex, cur_weight, cur_previous)
+            
 
 
-new_graph = mst(graph, 0)
-print_graph(new_graph)
+        for v in range(len(graph[cur_vertex])):
+            edge_to = graph[cur_vertex][v]
+            if not visited[edge_to[1]]:
+                heapq.heappush(queue, [edge_to[0], edge_to[1], cur_vertex])
+
+    return mst, mst_cost
+    
+
+vertices, edges = map(int, input().split())
+graph = [[] for i in range(vertices)]
+
+while edges:
+    origin, destination, weight = map(int, input().split())
+    graph[origin].append([weight, destination])
+    graph[destination].append([weight, origin])
+    edges -= 1
+
+if DEBUG:
+    for x in graph: print(x)
+
+mst, mst_cost = prim(graph, 4)
+for x in mst:
+    print(x)
+
+print('MST Cost:', mst_cost)

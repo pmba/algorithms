@@ -1,66 +1,75 @@
-parent = dict()
-rank = dict()
+import heapq
 
-def make_set(vertice):
-    parent[vertice] = vertice
-    rank[vertice] = 0
+class UnionFind:
+    def __init__(self, size):
+        self.parent = [-1 for x in range(size)]
 
-def find(vertice):
-    if parent[vertice] != vertice:
-        parent[vertice] = find(parent[vertice])
-    return parent[vertice]
+    def root(self, v):
+        if self.parent[v] < 0:
+            return v
+        else:
+            self.parent[v] = self.root(self.parent[v])
+            return self.parent[v]
 
-def union(vertice1, vertice2):
-    root1 = find(vertice1)
-    root2 = find(vertice2)
-    if root1 != root2:
-        if rank[root1] > rank[root2]:
-            parent[root2] = root1
-    else:
-	    parent[root1] = root2
-    if rank[root1] == rank[root2]: rank[root2] += 1
+    def sameSet(self, v, u):
+        return self.root(v) == self.root(u)
 
-def kruskal(graph):
-    for vertice in graph['vertices']:
-	make_set(vertice)
-	minimum_spanning_tree = set()
-	edges = list(graph['edges'])
-	edges.sort()
-	#print edges
-    for edge in edges:
-	weight, vertice1, vertice2 = edge
-	if find(vertice1) != find(vertice2):
-	    union(vertice1, vertice2)
-	    minimum_spanning_tree.add(edge)
-	    
-    return sorted(minimum_spanning_tree)
+    def merge(self, v, u):
+        v = self.root(v)
+        u = self.root(u)
 
-graph = {
-'vertices': ['A', 'B', 'C', 'D', 'E', 'F', 'G'],
-'edges': set([
-(7, 'A', 'B'),
-(5, 'A', 'D'),
-(7, 'B', 'A'),
-(8, 'B', 'C'),
-(9, 'B', 'D'),
-(7, 'B', 'E'),
-(8, 'C', 'B'),
-(5, 'C', 'E'),
-(5, 'D', 'A'),
-(9, 'D', 'B'),
-(7, 'D', 'E'),
-(6, 'D', 'F'),
-(7, 'E', 'B'),
-(5, 'E', 'C'),
-(15, 'E', 'D'),
-(8, 'E', 'F'),
-(9, 'E', 'G'),
-(6, 'F', 'D'),
-(8, 'F', 'E'),
-(11, 'F', 'G'),
-(9, 'G', 'E'),
-(11, 'G', 'F'),
-])
-}
+        if v == u: 
+            return
 
-print kruskal(graph)
+        if self.parent[u] < self.parent[v]:
+            aux = self.parent[u]
+            self.parent[u] = self.parent[v]
+            self.parent[v] = aux
+
+        self.parent[v] += self.parent[u]
+        self.parent[u] = v
+
+class Graph:
+    def __init__(self, vertices):
+        self.cost = 0
+        self.V = vertices
+        self.graph = [[] for i in range(vertices)]
+    
+    def addEdge(self, u, v, w):
+        self.cost += w
+        self.graph[u].append([v, w])
+        self.graph[v].append([u, w])
+
+    def printGraph(self):
+        for i in range(len(self.graph)):
+            print(i, '-', self.graph[i])
+
+G = Graph(4)
+UF = UnionFind(4)
+Q = []
+
+G.addEdge(0, 1, 2)
+heapq.heappush(Q, [2, 0, 1])
+G.addEdge(0, 3, 5)
+heapq.heappush(Q, [5, 0, 3])
+G.addEdge(1, 2, 1)
+heapq.heappush(Q, [1, 1, 2])
+G.addEdge(1, 3, 4)
+heapq.heappush(Q, [4, 1, 3])
+G.addEdge(2, 3, 3)
+heapq.heappush(Q, [3, 2, 3])
+
+print('\nGraph Cost:', G.cost)
+G.printGraph()
+
+mst_cost = 0
+MST = Graph(4)
+
+while Q:
+    cost, origin, destination = heapq.heappop(Q)
+    if not UF.sameSet(origin, destination):
+        MST.addEdge(origin, destination, cost)
+        UF.merge(origin, destination)
+
+print('\nMST Cost:', MST.cost)
+MST.printGraph()
